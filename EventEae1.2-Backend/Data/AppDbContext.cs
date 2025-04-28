@@ -15,7 +15,7 @@ namespace EventEae1._2_Backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure User entity
+            
             modelBuilder.Entity<User>()
                 .HasKey(u => u.Id);
 
@@ -40,12 +40,12 @@ namespace EventEae1._2_Backend.Data
                 .HasMaxLength(255);
 
             modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasDefaultValue("client");
+                .Property(u => u.Role);
+
 
             modelBuilder.Entity<User>()
-                .Property(u => u.Status)
-                .HasDefaultValueSql("'approved'");
+                .Property(u => u.Status);
+                
 
 
         }

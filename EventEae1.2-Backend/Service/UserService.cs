@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BCrypt.Net;
 using EventEae1._2_Backend.DTOs;
 using EventEae1._2_Backend.Interfaces;
 using EventEae1._2_Backend.Models;
@@ -50,7 +49,7 @@ namespace EventEae1._2_Backend.Services
             if (user == null)
                 throw new Exception("Email not found.");
 
-            // You could send email here (mock for now)
+            // send email here (mock for now)
         }
     }
 }
