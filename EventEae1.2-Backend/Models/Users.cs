@@ -9,10 +9,10 @@ namespace EventEae1._2_Backend.Models
             public string Id { get; set; }
 
             
-            public string Firstname { get; set; }
+            public string FirstName { get; set; }
 
            
-            public string Lastname { get; set; }
+            public string LastName { get; set; }
 
            
             public string Email { get; set; }
@@ -20,8 +20,8 @@ namespace EventEae1._2_Backend.Models
             public string Password { get; set; }
 
            
-            [RegularExpression("user|manager|admin")]
-            public string Role { get; set; } = "user";
+            [RegularExpression("client|manager|admin")]
+            public string Role { get; set; } = "client";
 
          
             public string? Organization { get; set; }
