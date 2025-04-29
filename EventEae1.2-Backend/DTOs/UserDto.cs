@@ -39,4 +39,11 @@
     {
         public string Email { get; set; }
     }
+
+    //for otp verification
+    public class VerifyOtpDto
+    {
+        public string Email { get; set; }
+        public string Otp { get; set; }
+    }
 }
