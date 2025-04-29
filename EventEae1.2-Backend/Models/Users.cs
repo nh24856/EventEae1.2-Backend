@@ -5,11 +5,12 @@ namespace EventEae1._2_Backend.Models
    
         public class User
         {
-            
-            public string Id { get; set; }
 
-            
-            public string FirstName { get; set; }
+          [Key]
+          public Guid Id { get; set; } = Guid.NewGuid();
+
+
+           public string FirstName { get; set; }
 
            
             public string LastName { get; set; }
