@@ -15,9 +15,10 @@ namespace EventEae1._2_Backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+
             modelBuilder.Entity<User>()
-                .HasKey(u => u.Id);
+                .Property(u => u.Id)
+                .HasDefaultValueSql("NEWID()");
 
             modelBuilder.Entity<User>()
                 .Property(u => u.FirstName)
