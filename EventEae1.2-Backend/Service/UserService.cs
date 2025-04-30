@@ -33,14 +33,37 @@ namespace EventEae1._2_Backend.Services
             return _mapper.Map<UserDto>(user);
         }
 
-        public async Task<string> LoginAsync(LoginUserDto dto)
+        public async Task<LoginResponseDto> LoginAsync(LoginUserDto dto)
         {
-            var user = await _userRepository.GetUserByEmailAsync(dto.Email);
+            var user = await _userRepository.GetUserWithPermissionsAsync(dto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
                 throw new Exception("Invalid email or password.");
 
-            // Later: Generate JWT Token
-            return "DummyTokenForNow";
+            // Get role-based permissions
+            var rolePermissions = user.Role != null
+                ? await _userRepository.GetPermissionsByRoleAsync(user.Role)
+                : new List<string>();
+
+            // User-specific permissions
+            var userPermissions = user.UserPermissions?
+                .Select(up => up.Permission.Name)
+                .ToList() ?? new List<string>();
+
+            var allPermissions = rolePermissions
+                .Union(userPermissions)
+                .Distinct()
+                .ToList();
+
+            return new LoginResponseDto
+            {
+                Id = user.Id.ToString(),
+                Firstname = user.FirstName,
+                Lastname = user.LastName,
+                Email = user.Email,
+                Role = user.Role,
+                Status = user.Status,
+                Permissions = allPermissions
+            };
         }
 
         public async Task ForgotPasswordAsync(ForgotPasswordDto dto)

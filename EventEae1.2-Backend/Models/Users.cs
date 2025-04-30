@@ -30,6 +30,8 @@ namespace EventEae1._2_Backend.Models
          
             [RegularExpression("approved|pending|rejected")]
             public string Status { get; set; } = "approved";
-        }
+
+            public ICollection<UserPermission> UserPermissions { get; set; }
+    }
     
 }

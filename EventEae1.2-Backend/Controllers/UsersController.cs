@@ -36,14 +36,15 @@ namespace EventEae1._2_Backend.Controllers
         {
             try
             {
-                var token = await _userService.LoginAsync(dto);
-                return Ok(new { Token = token }); // In real apps, return a JWT token
+                var loginResponse = await _userService.LoginAsync(dto);
+                return Ok(loginResponse); 
             }
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
         }
+        
 
         // POST: api/Users/forgot-password
         [HttpPost("forgot-password")]
