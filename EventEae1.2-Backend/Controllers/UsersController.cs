@@ -39,8 +39,7 @@ namespace EventEae1._2_Backend.Controllers
         {
             try
             {
-                var loginResponse = await _userService.LoginAsync(dto);
-                return Ok(loginResponse); 
+         
 
                 await _userService.LoginAsync(dto);
 

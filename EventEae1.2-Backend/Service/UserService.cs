@@ -16,10 +16,7 @@ namespace EventEae1._2_Backend.Services
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
 
-        public UserService(
-            IUserRepository userRepository,
-            IMapper mapper,
-            IConfiguration config)
+        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration config)
         {
             _userRepository = userRepository;
             _mapper = mapper;
@@ -49,7 +46,39 @@ namespace EventEae1._2_Backend.Services
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
                 throw new Exception("Invalid email or password.");
 
-            // Get permissions
+            var allPermissions = await GetAllPermissionsAsync(user);
+            var token = GenerateJwtToken(user, allPermissions);
+
+            return CreateLoginResponse(user, token, allPermissions);
+        }
+
+        public async Task<LoginResponseDto> GenerateTokenAsync(string email)
+        {
+            var user = await _userRepository.GetUserWithPermissionsAsync(email);
+            if (user == null)
+                throw new Exception("User not found.");
+
+            var allPermissions = await GetAllPermissionsAsync(user);
+            var token = GenerateJwtToken(user, allPermissions);
+
+            return CreateLoginResponse(user, token, allPermissions);
+        }
+
+        public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
+        {
+            var user = await _userRepository.GetUserByEmailAsync(dto.Email);
+            if (user == null)
+                throw new Exception("Email not found.");
+
+            // Generate password reset token (simplified)
+            var resetToken = Guid.NewGuid().ToString();
+            // In real implementation: store token and send email
+        }
+
+        // Helpers
+
+        private async Task<List<string>> GetAllPermissionsAsync(User user)
+        {
             var rolePermissions = user.Role != null
                 ? await _userRepository.GetPermissionsByRoleAsync(user.Role)
                 : new List<string>();
@@ -58,26 +87,10 @@ namespace EventEae1._2_Backend.Services
                 .Select(up => up.Permission.Name)
                 .ToList() ?? new List<string>();
 
-            var allPermissions = rolePermissions
+            return rolePermissions
                 .Union(userPermissions)
                 .Distinct()
                 .ToList();
-
-            // Generate JWT token
-            var token = GenerateJwtToken(user, allPermissions);
-
-            return new LoginResponseDto
-            {
-                Token = token,
-                Id = user.Id.ToString(),
-                Firstname = user.FirstName,
-                Lastname = user.LastName,
-                Email = user.Email,
-                Role = user.Role,
-                Status = user.Status,
-                Permissions = allPermissions,
-                ExpiresIn = Convert.ToInt32(_config["Jwt:ExpireMinutes"]) * 60
-            };
         }
 
         private string GenerateJwtToken(User user, List<string> permissions)
@@ -90,7 +103,6 @@ namespace EventEae1._2_Backend.Services
                 new Claim(ClaimTypes.Role, user.Role ?? "user")
             };
 
-            // Add permissions as claims
             permissions.ForEach(p => claims.Add(new Claim("permission", p)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -108,25 +120,20 @@ namespace EventEae1._2_Backend.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<string> GenerateTokenAsync(string email)
+        private LoginResponseDto CreateLoginResponse(User user, string token, List<string> permissions)
         {
-            var user = await _userRepository.GetUserByEmailAsync(email);
-            if (user == null)
-                throw new Exception("User not found.");
-
-            // Later: Generate JWT Token
-            return "DummyTokenForNow";
-        }
-
-        public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
-        {
-            var user = await _userRepository.GetUserByEmailAsync(dto.Email);
-            if (user == null)
-                throw new Exception("Email not found.");
-
-            // Generate password reset token (simplified)
-            var resetToken = Guid.NewGuid().ToString();
-            // In real implementation: store token and send email
+            return new LoginResponseDto
+            {
+                Token = token,
+                Id = user.Id.ToString(),
+                Firstname = user.FirstName,
+                Lastname = user.LastName,
+                Email = user.Email,
+                Role = user.Role,
+                Status = user.Status,
+                Permissions = permissions,
+                ExpiresIn = Convert.ToInt32(_config["Jwt:ExpireMinutes"]) * 60
+            };
         }
     }
 }
