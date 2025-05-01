@@ -108,6 +108,16 @@ namespace EventEae1._2_Backend.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public async Task<string> GenerateTokenAsync(string email)
+        {
+            var user = await _userRepository.GetUserByEmailAsync(email);
+            if (user == null)
+                throw new Exception("User not found.");
+
+            // Later: Generate JWT Token
+            return "DummyTokenForNow";
+        }
+
         public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
         {
             var user = await _userRepository.GetUserByEmailAsync(dto.Email);

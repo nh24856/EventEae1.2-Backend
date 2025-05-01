@@ -39,6 +39,7 @@
     {
         public string Email { get; set; }
     }
+
     public class LoginResponseDto
     {
         public string Id { get; set; }
@@ -69,4 +70,12 @@
         public DateTime RequestedAt { get; set; }
     }
 
+
+
+    //for otp verification
+    public class VerifyOtpDto
+    {
+        public string Email { get; set; }
+        public string Otp { get; set; }
+    }
 }
