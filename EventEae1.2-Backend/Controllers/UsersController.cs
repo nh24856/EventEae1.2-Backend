@@ -39,6 +39,9 @@ namespace EventEae1._2_Backend.Controllers
         {
             try
             {
+                var loginResponse = await _userService.LoginAsync(dto);
+                return Ok(loginResponse); 
+
                 await _userService.LoginAsync(dto);
 
                 await _otpService.GenerateAndSendOTPAsync(dto.Email);
@@ -50,6 +53,7 @@ namespace EventEae1._2_Backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        
 
         // POST: api/Users/forgot-password
         [HttpPost("forgot-password")]

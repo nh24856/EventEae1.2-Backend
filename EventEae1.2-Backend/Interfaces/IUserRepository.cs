@@ -6,5 +6,7 @@ namespace EventEae1._2_Backend.Interfaces
     {
         Task<User> GetUserByEmailAsync(string email);
         Task AddUserAsync(User user);
+        Task<User?> GetUserWithPermissionsAsync(string email);
+        Task<List<string>> GetPermissionsByRoleAsync(string role);
     }
 }

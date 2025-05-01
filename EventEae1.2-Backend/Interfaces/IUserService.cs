@@ -7,6 +7,9 @@ namespace EventEae1._2_Backend.Interfaces
 
 
         Task<UserDto> RegisterAsync(RegisterUserDto dto);
+
+        Task<LoginResponseDto> LoginAsync(LoginUserDto dto);
+
         Task<string> LoginAsync(LoginUserDto dto);
         Task<string> GenerateTokenAsync(string email);
         Task ForgotPasswordAsync(ForgotPasswordDto dto);

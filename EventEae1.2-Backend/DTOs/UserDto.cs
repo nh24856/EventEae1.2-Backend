@@ -40,6 +40,38 @@
         public string Email { get; set; }
     }
 
+    public class LoginResponseDto
+    {
+        public string Id { get; set; }
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+        public string Status { get; set; }
+        public int ExpiresIn { get; set; }
+        public string Token { get; set; }
+        public List<string> Permissions { get; set; }
+    }
+
+    public class UpdatePermissionsDto
+    {
+        public List<string> Permissions { get; set; }
+    }
+
+    public class ManagerApprovalDto
+    {
+        public bool Approved { get; set; }
+    }
+    public class PendingManagerDto
+    {
+        public Guid Id { get; set; }
+        public string Email { get; set; }
+        public string OrganizationName { get; set; }
+        public DateTime RequestedAt { get; set; }
+    }
+
+
+
     //for otp verification
     public class VerifyOtpDto
     {

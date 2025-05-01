@@ -25,5 +25,21 @@ namespace EventEae1._2_Backend.Repositories
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<User?> GetUserWithPermissionsAsync(string email)
+        {
+            return await _context.Users
+                .Include(u => u.UserPermissions)
+                .ThenInclude(up => up.Permission)
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<List<string>> GetPermissionsByRoleAsync(string role)
+        {
+            return await _context.RolePermissions
+                .Where(rp => rp.Role == role)
+                .Select(rp => rp.Permission.Name)
+                .ToListAsync();
+        }
     }
 }

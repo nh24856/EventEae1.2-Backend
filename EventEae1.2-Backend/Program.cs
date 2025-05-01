@@ -1,11 +1,17 @@
+using System.Text;
 using EventEae1._2_Backend.Data;
 using EventEae1._2_Backend.Interfaces;
 using EventEae1._2_Backend.Repositories;
 using EventEae1._2_Backend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+
+using Microsoft.IdentityModel.Tokens;
+
 using Microsoft.Extensions.Caching.Memory;
 using AutoMapper;
 using EventEae1._2_Backend.Service;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +48,22 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 var app = builder.Build();
 
