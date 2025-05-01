@@ -104,11 +104,11 @@ namespace EventEae1._2_Backend.Data
                 new RolePermission { Role = "Manager", PermissionId = 9 }
             );
 
-            // Seed RolePermissions for User
+            // Seed RolePermissions for client
             modelBuilder.Entity<RolePermission>().HasData(
-                new RolePermission { Role = "User", PermissionId = 7 },
-                new RolePermission { Role = "User", PermissionId = 8 },
-                new RolePermission { Role = "User", PermissionId = 9 }
+                new RolePermission { Role = "client", PermissionId = 7 },
+                new RolePermission { Role = "client", PermissionId = 8 },
+                new RolePermission { Role = "client", PermissionId = 9 }
             );
         }
     }
