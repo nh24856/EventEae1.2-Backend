@@ -24,11 +24,9 @@ namespace EventEae1._2_Backend.Migrations
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.Event", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Category")
                         .IsRequired()
@@ -56,9 +54,6 @@ namespace EventEae1._2_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Venue")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -66,8 +61,6 @@ namespace EventEae1._2_Backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizerId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Events");
                 });
@@ -87,6 +80,53 @@ namespace EventEae1._2_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Permissions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "CanApproveManagers"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "CanManageUsers"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "CanManageSettings"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "CanCreateEvents"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "CanViewOwnEvents"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "CanViewTicketSales"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "CanBrowseEvents"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "CanViewOwnTickets"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "CanManageProfile"
+                        });
                 });
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.RolePermission", b =>
@@ -105,25 +145,91 @@ namespace EventEae1._2_Backend.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermissions");
+
+                    b.HasData(
+                        new
+                        {
+                            Role = "Admin",
+                            PermissionId = 1,
+                            Id = 1
+                        },
+                        new
+                        {
+                            Role = "Admin",
+                            PermissionId = 2,
+                            Id = 2
+                        },
+                        new
+                        {
+                            Role = "Admin",
+                            PermissionId = 3,
+                            Id = 3
+                        },
+                        new
+                        {
+                            Role = "Admin",
+                            PermissionId = 9,
+                            Id = 4
+                        },
+                        new
+                        {
+                            Role = "Manager",
+                            PermissionId = 4,
+                            Id = 5
+                        },
+                        new
+                        {
+                            Role = "Manager",
+                            PermissionId = 5,
+                            Id = 6
+                        },
+                        new
+                        {
+                            Role = "Manager",
+                            PermissionId = 6,
+                            Id = 7
+                        },
+                        new
+                        {
+                            Role = "Manager",
+                            PermissionId = 9,
+                            Id = 8
+                        },
+                        new
+                        {
+                            Role = "client",
+                            PermissionId = 7,
+                            Id = 9
+                        },
+                        new
+                        {
+                            Role = "client",
+                            PermissionId = 8,
+                            Id = 10
+                        },
+                        new
+                        {
+                            Role = "client",
+                            PermissionId = 9,
+                            Id = 11
+                        });
                 });
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.TicketType", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -196,14 +302,10 @@ namespace EventEae1._2_Backend.Migrations
             modelBuilder.Entity("EventEae1._2_Backend.Models.Event", b =>
                 {
                     b.HasOne("EventEae1._2_Backend.Models.User", "Organizer")
-                        .WithMany()
+                        .WithMany("OrganizedEvents")
                         .HasForeignKey("OrganizerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("EventEae1._2_Backend.Models.User", null)
-                        .WithMany("OrganizedEvents")
-                        .HasForeignKey("UserId");
 
                     b.Navigation("Organizer");
                 });

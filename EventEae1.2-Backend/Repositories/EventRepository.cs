@@ -42,7 +42,7 @@ namespace EventEae1._2_Backend.Repository
                 .ToListAsync();
         }
 
-        public async Task<Event?> GetEventByIdAsync(int id)
+        public async Task<Event?> GetEventByIdAsync(Guid id)
         {
             return await _context.Events
                 .Include(e => e.TicketTypes)

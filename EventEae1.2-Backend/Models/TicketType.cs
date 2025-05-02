@@ -1,14 +1,17 @@
-﻿namespace EventEae1._2_Backend.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EventEae1._2_Backend.Models
 {
     public class TicketType
     {
-        public int Id { get; set; }
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; }
 
-        public decimal Price { get; set; }
+        public int Price { get; set; }
 
-        public int EventId { get; set; }
+        public Guid EventId { get; set; }
 
         public Event Event { get; set; }
     }
