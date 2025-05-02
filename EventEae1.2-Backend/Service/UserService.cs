@@ -98,6 +98,7 @@ namespace EventEae1._2_Backend.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // 👈 ADD THIS LINE ✅
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Role, user.Role ?? "user")
@@ -124,13 +125,13 @@ namespace EventEae1._2_Backend.Services
         {
             return new LoginResponseDto
             {
-                Token = token,
                 Id = user.Id.ToString(),
                 Firstname = user.FirstName,
                 Lastname = user.LastName,
                 Email = user.Email,
                 Role = user.Role,
                 Status = user.Status,
+                Token = token, // Directly return the JWT token
                 Permissions = permissions,
                 ExpiresIn = Convert.ToInt32(_config["Jwt:ExpireMinutes"]) * 60
             };

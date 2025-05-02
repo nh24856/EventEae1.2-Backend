@@ -24,22 +24,22 @@ namespace EventEae1._2_Backend.Services
             _configuration = configuration;
         }
 
-        public async Task<EventResponseDto> CreateEventAsync(EventDto eventDto, string jwtToken)
+        public async Task<EventResponseDto> CreateEventAsync(EventDto eventDto, ClaimsPrincipal user)
         {
-            var userId = GetUserIdFromJwt(jwtToken);
-            if (userId == Guid.Empty)
-                throw new UnauthorizedAccessException("Invalid or expired JWT token");
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token claims.");
+            }
 
             // 1️⃣ Handle file upload
             string imagePath = null;
             if (eventDto.Image != null && eventDto.Image.Length > 0)
             {
-                // Create the uploads folder if it doesn't exist
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                // Unique file name
                 var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(eventDto.Image.FileName)}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -48,7 +48,6 @@ namespace EventEae1._2_Backend.Services
                     await eventDto.Image.CopyToAsync(stream);
                 }
 
-                // Set relative path to serve it via your API if needed
                 imagePath = $"/uploads/{uniqueFileName}";
             }
 
@@ -62,7 +61,7 @@ namespace EventEae1._2_Backend.Services
                 Description = eventDto.Description,
                 Category = eventDto.Category,
                 OrganizerId = userId,
-                ImagePath = imagePath,  // ✅ Save the image path
+                ImagePath = imagePath,
                 TicketTypes = eventDto.TicketTypes?.Select(t => new TicketType
                 {
                     Name = t.Name,
@@ -72,7 +71,6 @@ namespace EventEae1._2_Backend.Services
 
             var createdEvent = await _repository.CreateEventAsync(newEvent);
 
-            // ✅ Optionally: Fetch Organizer if null (ensure your repository includes it)
             if (createdEvent.Organizer == null)
             {
                 createdEvent = await _repository.GetEventByIdAsync(createdEvent.Id);
@@ -80,6 +78,7 @@ namespace EventEae1._2_Backend.Services
 
             return MapToResponseDto(createdEvent);
         }
+
 
 
         public async Task<EventResponseDto> GetEventByIdAsync(Guid id)
@@ -130,40 +129,38 @@ namespace EventEae1._2_Backend.Services
         private Guid GetUserIdFromJwt(string token)
         {
             if (string.IsNullOrEmpty(token))
-                return Guid.Empty;
-
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-            var userIdClaim = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
-                return Guid.Empty;
-
-            return Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
-        }
-
-        // Optional: JWT generation method (if still needed elsewhere)
-        public string GenerateJwtToken(User user)
-        {
-            var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
+                Console.WriteLine("Token is null or empty");
+                return Guid.Empty;
+            }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken == null)
+                {
+                    Console.WriteLine("Invalid token format");
+                    return Guid.Empty;
+                }
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds
-            );
+                var userIdClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    Console.WriteLine("NameIdentifier claim not found");
+                    Console.WriteLine("Available claims: " + string.Join(", ", jsonToken.Claims.Select(c => $"{c.Type}: {c.Value}")));
+                    return Guid.Empty;
+                }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                return Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Token validation error: {ex.Message}");
+                return Guid.Empty;
+            }
         }
+
+       
     }
 }
