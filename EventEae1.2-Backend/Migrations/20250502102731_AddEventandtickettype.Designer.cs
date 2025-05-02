@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventEae1._2_Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250502091203_AddEventEnhancements")]
-    partial class AddEventEnhancements
+    [Migration("20250502102731_AddEventandtickettype")]
+    partial class AddEventandtickettype
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,53 +90,6 @@ namespace EventEae1._2_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Permissions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "CanApproveManagers"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "CanManageUsers"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "CanManageSettings"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "CanCreateEvents"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "CanViewOwnEvents"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "CanViewTicketSales"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "CanBrowseEvents"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "CanViewOwnTickets"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "CanManageProfile"
-                        });
                 });
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.RolePermission", b =>
@@ -155,74 +108,6 @@ namespace EventEae1._2_Backend.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermissions");
-
-                    b.HasData(
-                        new
-                        {
-                            Role = "Admin",
-                            PermissionId = 1,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Admin",
-                            PermissionId = 2,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Admin",
-                            PermissionId = 3,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Admin",
-                            PermissionId = 9,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Manager",
-                            PermissionId = 4,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Manager",
-                            PermissionId = 5,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Manager",
-                            PermissionId = 6,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "Manager",
-                            PermissionId = 9,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "client",
-                            PermissionId = 7,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "client",
-                            PermissionId = 8,
-                            Id = 0
-                        },
-                        new
-                        {
-                            Role = "client",
-                            PermissionId = 9,
-                            Id = 0
-                        });
                 });
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.TicketType", b =>
