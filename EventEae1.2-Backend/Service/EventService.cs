@@ -65,8 +65,9 @@ namespace EventEae1._2_Backend.Services
                 TicketTypes = eventDto.TicketTypes?.Select(t => new TicketType
                 {
                     Name = t.Name,
-                    Price = t.Price
-                }).ToList()
+                    Price = t.Price,
+                    Id = Guid.NewGuid()
+                }).ToList() ?? new List<TicketType>()
             };
 
             var createdEvent = await _repository.CreateEventAsync(newEvent);
@@ -99,6 +100,24 @@ namespace EventEae1._2_Backend.Services
         public async Task<List<EventResponseDto>> GetEventsByOrganizationAsync(string organizationName)
         {
             var events = await _repository.GetEventsByOrganizationAsync(organizationName);
+            return events.Select(MapToResponseDto).ToList();
+        }
+
+        public async Task<List<EventResponseDto>> GetEventsByOrganizerAsync(ClaimsPrincipal user)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token claims.");
+            }
+
+            var events = await _repository.GetEventsByOrganizerAsync(userId);
+            return events.Select(MapToResponseDto).ToList();
+        }
+
+        public async Task<List<EventResponseDto>> GetAllEventsAsync()
+        {
+            var events = await _repository.GetAllEventsAsync();
             return events.Select(MapToResponseDto).ToList();
         }
 

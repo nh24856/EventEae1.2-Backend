@@ -42,6 +42,15 @@ namespace EventEae1._2_Backend.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Event>> GetEventsByOrganizerAsync(Guid organizerId)
+        {
+            return await _context.Events
+                .Include(e => e.TicketTypes)
+                .Include(e => e.Organizer)
+                .Where(e => e.OrganizerId == organizerId)
+                .ToListAsync();
+        }
+
         public async Task<Event?> GetEventByIdAsync(Guid id)
         {
             return await _context.Events

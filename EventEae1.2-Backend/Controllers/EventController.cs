@@ -19,7 +19,7 @@ namespace EventEae1._2_Backend.Controllers
             _eventService = eventService;
         }
 
-        [Authorize] // 🔥 Added this to protect the route
+        [Authorize] 
         [HttpPost("create")]
         public async Task<IActionResult> CreateEvent([FromForm] EventDto eventDto)
         {
@@ -49,7 +49,17 @@ namespace EventEae1._2_Backend.Controllers
         [HttpGet("category/{category}")]
         public async Task<IActionResult> GetEventsByCategory(string category)
         {
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                return BadRequest("Category is required.");
+            }
+
             var events = await _eventService.GetEventsByCategoryAsync(category);
+            if (!events.Any())
+            {
+                return NotFound($"No events found for category '{category}'.");
+            }
+
             return Ok(events);
         }
 
@@ -68,6 +78,33 @@ namespace EventEae1._2_Backend.Controllers
                 return NotFound();
 
             return Ok(eventItem);
+        }
+
+
+        [HttpGet("allEvents")]
+        public async Task<IActionResult> GetAllEvents()
+        {
+            var events = await _eventService.GetAllEventsAsync();
+            return Ok(events);
+        }
+
+        [Authorize]
+        [HttpGet("my-events")]
+        public async Task<IActionResult> GetMyEvents()
+        {
+            try
+            {
+                var events = await _eventService.GetEventsByOrganizerAsync(User);
+                return Ok(events);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid or expired JWT token.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }
