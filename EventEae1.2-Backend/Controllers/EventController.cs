@@ -1,5 +1,6 @@
 ﻿using EventEae1._2_Backend.DTOs;
 using EventEae1._2_Backend.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -18,21 +19,17 @@ namespace EventEae1._2_Backend.Controllers
             _eventService = eventService;
         }
 
+        [Authorize] // 🔥 Added this to protect the route
         [HttpPost("create")]
         public async Task<IActionResult> CreateEvent([FromForm] EventDto eventDto)
         {
             if (eventDto == null)
                 return BadRequest("Event data is required.");
 
-            var authHeader = Request.Headers["Authorization"].ToString();
-            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-                return Unauthorized("Authorization token is missing or invalid.");
-
-            var jwtToken = authHeader.Replace("Bearer ", "");
-
             try
             {
-                var createdEvent = await _eventService.CreateEventAsync(eventDto, jwtToken);
+                // Instead of extracting the token manually, get user info from User.Claims
+                var createdEvent = await _eventService.CreateEventAsync(eventDto, User);
 
                 if (createdEvent == null)
                     return StatusCode(500, "An error occurred while creating the event.");
