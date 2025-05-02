@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EventEae1._2_Backend.DTOs;
 using EventEae1._2_Backend.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EventEae1._2_Backend.Controllers
 {
@@ -83,6 +86,33 @@ namespace EventEae1._2_Backend.Controllers
                 // Credentials were already validated during login, so proceed with token generation
                 var token = await _userService.GenerateTokenAsync(dto.Email);
                 return Ok(new { Token = token });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpPost("logout")]
+        [Authorize] // Requires authenticated user
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                // Get the JWT token from Authorization header
+                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Get the unique token identifier (jti claim)
+                var jti = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+
+                // Get token expiration time
+                var exp = User.FindFirstValue(JwtRegisteredClaimNames.Exp);
+                var expiryDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(exp)).DateTime;
+
+               
+
+                // If using refresh tokens, you would invalidate them here too
+
+                return Ok(new { message = "Logout successful" });
             }
             catch (Exception ex)
             {

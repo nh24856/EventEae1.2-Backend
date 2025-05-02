@@ -3,6 +3,7 @@ using EventEae1._2_Backend.Models;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Security;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EventEae1._2_Backend.Data
 {
@@ -16,6 +17,8 @@ namespace EventEae1._2_Backend.Data
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<TicketType> TicketTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -110,6 +113,30 @@ namespace EventEae1._2_Backend.Data
                 new RolePermission { Role = "client", PermissionId = 8 },
                 new RolePermission { Role = "client", PermissionId = 9 }
             );
+         
+            modelBuilder.Entity<Event>()
+                .HasMany(e => e.TicketTypes)
+                .WithOne(t => t.Event)
+                .HasForeignKey(t => t.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+           
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.UserPermissions)
+                .WithOne(up => up.User)
+                .HasForeignKey(up => up.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+           
+
+            
+            modelBuilder.Entity<Event>()
+                .HasOne(e => e.Organizer)
+                .WithMany() // If you want: .WithMany(u => u.OrganizedEvents)
+                .HasForeignKey(e => e.OrganizerId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent manager deletion if events exist
+
+            
         }
     }
 }

@@ -10,6 +10,8 @@
         public string Role { get; set; }
         public string? Organization { get; set; }
         public string Status { get; set; }
+
+        public List<string> Permissions { get; set; }
     }
 
     // For user registration (sign up)

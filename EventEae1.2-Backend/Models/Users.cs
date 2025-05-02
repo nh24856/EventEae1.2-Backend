@@ -32,6 +32,7 @@ namespace EventEae1._2_Backend.Models
             public string Status { get; set; } = "approved";
 
             public ICollection<UserPermission> UserPermissions { get; set; }
+            public ICollection<Event> OrganizedEvents { get; set; }
     }
     
 }
