@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventEae1._2_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class SeedPermissions : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,6 +24,24 @@ namespace EventEae1._2_Backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Permissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    FirstName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Organization = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -43,6 +61,31 @@ namespace EventEae1._2_Backend.Migrations
                         principalTable: "Permissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Events",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Venue = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Time = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrganizerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Events_Users_OrganizerId",
+                        column: x => x.OrganizerId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -70,6 +113,26 @@ namespace EventEae1._2_Backend.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TicketTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TicketTypes_Events_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Permissions",
                 columns: new[] { "Id", "Name" },
@@ -91,23 +154,33 @@ namespace EventEae1._2_Backend.Migrations
                 columns: new[] { "PermissionId", "Role", "Id" },
                 values: new object[,]
                 {
-                    { 1, "Admin", 0 },
-                    { 2, "Admin", 0 },
-                    { 3, "Admin", 0 },
-                    { 9, "Admin", 0 },
-                    { 4, "Manager", 0 },
-                    { 5, "Manager", 0 },
-                    { 6, "Manager", 0 },
-                    { 9, "Manager", 0 },
-                    { 7, "User", 0 },
-                    { 8, "User", 0 },
-                    { 9, "User", 0 }
+                    { 1, "Admin", 1 },
+                    { 2, "Admin", 2 },
+                    { 3, "Admin", 3 },
+                    { 9, "Admin", 4 },
+                    { 7, "client", 9 },
+                    { 8, "client", 10 },
+                    { 9, "client", 11 },
+                    { 4, "Manager", 5 },
+                    { 5, "Manager", 6 },
+                    { 6, "Manager", 7 },
+                    { 9, "Manager", 8 }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_OrganizerId",
+                table: "Events",
+                column: "OrganizerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
                 table: "RolePermissions",
                 column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketTypes_EventId",
+                table: "TicketTypes",
+                column: "EventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserPermissions_PermissionId",
@@ -122,10 +195,19 @@ namespace EventEae1._2_Backend.Migrations
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
+                name: "TicketTypes");
+
+            migrationBuilder.DropTable(
                 name: "UserPermissions");
 
             migrationBuilder.DropTable(
+                name: "Events");
+
+            migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

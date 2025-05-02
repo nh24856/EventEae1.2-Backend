@@ -6,8 +6,9 @@ namespace EventEae1._2_Backend.Interfaces
 {
     public interface IEventService
     {
-        Task<EventDto> CreateEventAsync(EventDto eventDto, string jwtToken);  // Ensure this method signature matches
-        Task<List<EventDto>> GetEventsByCategoryAsync(string category);
-        Task<List<EventDto>> GetEventsByOrganizationAsync(string organizationName);
+        Task<EventResponseDto> CreateEventAsync(EventDto eventDto, string jwtToken);
+        Task<EventResponseDto> GetEventByIdAsync(Guid id);
+        Task<List<EventResponseDto>> GetEventsByCategoryAsync(string category);
+        Task<List<EventResponseDto>> GetEventsByOrganizationAsync(string organizationName);
     }
 }

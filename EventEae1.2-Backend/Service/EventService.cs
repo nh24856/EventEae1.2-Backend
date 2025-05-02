@@ -24,13 +24,35 @@ namespace EventEae1._2_Backend.Services
             _configuration = configuration;
         }
 
-        public async Task<EventDto> CreateEventAsync(EventDto eventDto, string jwtToken)
+        public async Task<EventResponseDto> CreateEventAsync(EventDto eventDto, string jwtToken)
         {
-            // Get User information from JWT token
             var userId = GetUserIdFromJwt(jwtToken);
             if (userId == Guid.Empty)
                 throw new UnauthorizedAccessException("Invalid or expired JWT token");
 
+            // 1️⃣ Handle file upload
+            string imagePath = null;
+            if (eventDto.Image != null && eventDto.Image.Length > 0)
+            {
+                // Create the uploads folder if it doesn't exist
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Unique file name
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(eventDto.Image.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await eventDto.Image.CopyToAsync(stream);
+                }
+
+                // Set relative path to serve it via your API if needed
+                imagePath = $"/uploads/{uniqueFileName}";
+            }
+
+            // 2️⃣ Create the event entity
             var newEvent = new Event
             {
                 Name = eventDto.Name,
@@ -39,7 +61,8 @@ namespace EventEae1._2_Backend.Services
                 Time = eventDto.Time,
                 Description = eventDto.Description,
                 Category = eventDto.Category,
-                OrganizerId = userId, // User ID from JWT
+                OrganizerId = userId,
+                ImagePath = imagePath,  // ✅ Save the image path
                 TicketTypes = eventDto.TicketTypes?.Select(t => new TicketType
                 {
                     Name = t.Name,
@@ -48,24 +71,41 @@ namespace EventEae1._2_Backend.Services
             };
 
             var createdEvent = await _repository.CreateEventAsync(newEvent);
-            return MapToDto(createdEvent);
+
+            // ✅ Optionally: Fetch Organizer if null (ensure your repository includes it)
+            if (createdEvent.Organizer == null)
+            {
+                createdEvent = await _repository.GetEventByIdAsync(createdEvent.Id);
+            }
+
+            return MapToResponseDto(createdEvent);
         }
 
-        public async Task<List<EventDto>> GetEventsByCategoryAsync(string category)
+
+        public async Task<EventResponseDto> GetEventByIdAsync(Guid id)
+        {
+            var e = await _repository.GetEventByIdAsync(id);
+            if (e == null)
+                return null;
+
+            return MapToResponseDto(e);
+        }
+
+        public async Task<List<EventResponseDto>> GetEventsByCategoryAsync(string category)
         {
             var events = await _repository.GetEventsByCategoryAsync(category);
-            return events.Select(MapToDto).ToList();
+            return events.Select(MapToResponseDto).ToList();
         }
 
-        public async Task<List<EventDto>> GetEventsByOrganizationAsync(string organizationName)
+        public async Task<List<EventResponseDto>> GetEventsByOrganizationAsync(string organizationName)
         {
             var events = await _repository.GetEventsByOrganizationAsync(organizationName);
-            return events.Select(MapToDto).ToList();
+            return events.Select(MapToResponseDto).ToList();
         }
 
-        private EventDto MapToDto(Event e)
+        private EventResponseDto MapToResponseDto(Event e)
         {
-            return new EventDto
+            return new EventResponseDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -76,6 +116,7 @@ namespace EventEae1._2_Backend.Services
                 Category = e.Category,
                 OrganizerId = e.OrganizerId,
                 OrganizerName = e.Organizer != null ? $"{e.Organizer.FirstName} {e.Organizer.LastName}" : null,
+                ImagePath = e.ImagePath,  // ✅ Add this if not already there
                 TicketTypes = e.TicketTypes?.Select(t => new TicketTypeDto
                 {
                     Id = t.Id,
@@ -84,6 +125,7 @@ namespace EventEae1._2_Backend.Services
                 }).ToList()
             };
         }
+
 
         private Guid GetUserIdFromJwt(string token)
         {
@@ -100,7 +142,7 @@ namespace EventEae1._2_Backend.Services
             return Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
         }
 
-        // Optional: Method to generate JWT token for users (e.g., for login endpoint)
+        // Optional: JWT generation method (if still needed elsewhere)
         public string GenerateJwtToken(User user)
         {
             var claims = new[]

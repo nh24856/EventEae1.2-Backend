@@ -1,7 +1,7 @@
 ﻿using EventEae1._2_Backend.DTOs;
 using EventEae1._2_Backend.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -18,9 +18,8 @@ namespace EventEae1._2_Backend.Controllers
             _eventService = eventService;
         }
 
-        
         [HttpPost("create")]
-        public async Task<IActionResult> CreateEvent([FromBody] EventDto eventDto)
+        public async Task<IActionResult> CreateEvent([FromForm] EventDto eventDto)
         {
             if (eventDto == null)
                 return BadRequest("Event data is required.");
@@ -50,8 +49,6 @@ namespace EventEae1._2_Backend.Controllers
             }
         }
 
-
-
         [HttpGet("category/{category}")]
         public async Task<IActionResult> GetEventsByCategory(string category)
         {
@@ -59,7 +56,6 @@ namespace EventEae1._2_Backend.Controllers
             return Ok(events);
         }
 
-       
         [HttpGet("organization/{organizationName}")]
         public async Task<IActionResult> GetEventsByOrganization(string organizationName)
         {
@@ -67,16 +63,12 @@ namespace EventEae1._2_Backend.Controllers
             return Ok(events);
         }
 
-        // GET: api/Event/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEventById(int id)
+        public async Task<IActionResult> GetEventById(Guid id)
         {
-            var events = await _eventService.GetEventsByCategoryAsync("categoryName"); // Adjust this as needed
-            var eventItem = events?.Find(e => e.Id == id); // Replace this with the correct method to get an event by Id
+            var eventItem = await _eventService.GetEventByIdAsync(id);
             if (eventItem == null)
-            {
                 return NotFound();
-            }
 
             return Ok(eventItem);
         }

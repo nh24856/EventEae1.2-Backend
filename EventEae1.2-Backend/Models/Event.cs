@@ -1,10 +1,14 @@
 ﻿using System.Net.Sockets;
 
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
 namespace EventEae1._2_Backend.Models
 {
     public class Event
     {
-        public int Id { get; set; }
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; }
 
@@ -13,18 +17,17 @@ namespace EventEae1._2_Backend.Models
 
         public string ImagePath { get; set; }
 
-
         public DateTime Date { get; set; }
 
         public string Time { get; set; } // Alternatively use TimeSpan
 
         public string Description { get; set; }
 
-        public ICollection<TicketType> TicketTypes { get; set; }
-
         public Guid OrganizerId { get; set; }
 
         // Navigation Property to the User (Organizer)
         public User Organizer { get; set; }
+
+        public ICollection<TicketType> TicketTypes { get; set; }
     }
 }

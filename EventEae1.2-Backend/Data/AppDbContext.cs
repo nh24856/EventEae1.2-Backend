@@ -24,6 +24,7 @@ namespace EventEae1._2_Backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // User configuration
             modelBuilder.Entity<User>()
                 .Property(u => u.Id)
                 .HasDefaultValueSql("NEWID()");
@@ -51,10 +52,10 @@ namespace EventEae1._2_Backend.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Role);
 
-
             modelBuilder.Entity<User>()
                 .Property(u => u.Status);
 
+            // RolePermission configuration
             modelBuilder.Entity<RolePermission>()
                 .HasKey(rp => new { rp.Role, rp.PermissionId });
 
@@ -63,6 +64,7 @@ namespace EventEae1._2_Backend.Data
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId);
 
+            // UserPermission configuration
             modelBuilder.Entity<UserPermission>()
                 .HasKey(up => new { up.UserId, up.PermissionId });
 
@@ -76,61 +78,60 @@ namespace EventEae1._2_Backend.Data
                 .WithMany(u => u.UserPermissions)
                 .HasForeignKey(up => up.UserId);
 
-  //          var permissions = new[]
-  //{
-  //      new Permission { Id = 1, Name = DefaultPermissions.CanApproveManagers },
-  //      new Permission { Id = 2, Name = DefaultPermissions.CanManageUsers },
-  //      new Permission { Id = 3, Name = DefaultPermissions.CanManageSettings },
-  //      new Permission { Id = 4, Name = DefaultPermissions.CanCreateEvents },
-  //      new Permission { Id = 5, Name = DefaultPermissions.CanViewOwnEvents },
-  //      new Permission { Id = 6, Name = DefaultPermissions.CanViewTicketSales },
-  //      new Permission { Id = 7, Name = DefaultPermissions.CanBrowseEvents },
-  //      new Permission { Id = 8, Name = DefaultPermissions.CanViewOwnTickets },
-  //      new Permission { Id = 9, Name = DefaultPermissions.CanManageProfile }
-  //  };
+            // Seed Permissions
+            var permissions = new[]
+            {
+        new Permission { Id = 1, Name = DefaultPermissions.CanApproveManagers },
+        new Permission { Id = 2, Name = DefaultPermissions.CanManageUsers },
+        new Permission { Id = 3, Name = DefaultPermissions.CanManageSettings },
+        new Permission { Id = 4, Name = DefaultPermissions.CanCreateEvents },
+        new Permission { Id = 5, Name = DefaultPermissions.CanViewOwnEvents },
+        new Permission { Id = 6, Name = DefaultPermissions.CanViewTicketSales },
+        new Permission { Id = 7, Name = DefaultPermissions.CanBrowseEvents },
+        new Permission { Id = 8, Name = DefaultPermissions.CanViewOwnTickets },
+        new Permission { Id = 9, Name = DefaultPermissions.CanManageProfile }
+    };
 
-//            modelBuilder.Entity<RolePermission>().HasData(
-//    // Admin permissions
-//            new RolePermission { Role = "Admin", PermissionId = 1 },
-//            new RolePermission { Role = "Admin", PermissionId = 2 },
-//            new RolePermission { Role = "Admin", PermissionId = 3 },
-//            new RolePermission { Role = "Admin", PermissionId = 9 },
+            modelBuilder.Entity<Permission>().HasData(permissions);
 
-//    // Manager permissions
-//             new RolePermission { Role = "Manager", PermissionId = 4 },
-//             new RolePermission { Role = "Manager", PermissionId = 5 },
-//             new RolePermission { Role = "Manager", PermissionId = 6 },
-//             new RolePermission { Role = "Manager", PermissionId = 9 },
+            // Seed RolePermissions (remove Id field or ensure it's unique)
+            modelBuilder.Entity<RolePermission>().HasData(
+                // Admin permissions
+                new RolePermission { Role = "Admin", PermissionId = 1, Id = 1 },
+                new RolePermission { Role = "Admin", PermissionId = 2, Id = 2 },
+                new RolePermission { Role = "Admin", PermissionId = 3, Id = 3 },
+                new RolePermission { Role = "Admin", PermissionId = 9, Id = 4 },
 
-//    // Client permissions
-//             new RolePermission { Role = "client", PermissionId = 7 },
-//             new RolePermission { Role = "client", PermissionId = 8 },
-//             new RolePermission { Role = "client", PermissionId = 9 }
-//);
+                // Manager permissions
+                new RolePermission { Role = "Manager", PermissionId = 4, Id = 5 },
+                new RolePermission { Role = "Manager", PermissionId = 5, Id = 6 },
+                new RolePermission { Role = "Manager", PermissionId = 6, Id = 7 },
+                new RolePermission { Role = "Manager", PermissionId = 9, Id = 8 },
 
+                // Client permissions
+                new RolePermission { Role = "client", PermissionId = 7, Id = 9 },
+                new RolePermission { Role = "client", PermissionId = 8, Id = 10 },
+                new RolePermission { Role = "client", PermissionId = 9, Id = 11 }
+            );
+
+            // Event configuration
             modelBuilder.Entity<Event>()
                 .HasMany(e => e.TicketTypes)
                 .WithOne(t => t.Event)
                 .HasForeignKey(t => t.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-           
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserPermissions)
                 .WithOne(up => up.User)
                 .HasForeignKey(up => up.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-           
-
-            
             modelBuilder.Entity<Event>()
                 .HasOne(e => e.Organizer)
-                .WithMany() // If you want: .WithMany(u => u.OrganizedEvents)
+                .WithMany(u => u.OrganizedEvents) // Fixed: Reference OrganizedEvents
                 .HasForeignKey(e => e.OrganizerId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent manager deletion if events exist
-
-            
+                .OnDelete(DeleteBehavior.Restrict); // Prevent organizer deletion if events exist
         }
     }
 }
