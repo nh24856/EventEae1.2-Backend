@@ -11,5 +11,7 @@ namespace EventEae1._2_Backend.Interfaces
         Task<EventResponseDto> GetEventByIdAsync(Guid id);
         Task<List<EventResponseDto>> GetEventsByCategoryAsync(string category);
         Task<List<EventResponseDto>> GetEventsByOrganizationAsync(string organizationName);
+        Task<List<EventResponseDto>> GetEventsByOrganizerAsync(ClaimsPrincipal user);
+        Task<List<EventResponseDto>> GetAllEventsAsync();
     }
 }
