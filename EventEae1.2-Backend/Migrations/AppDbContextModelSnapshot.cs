@@ -215,6 +215,40 @@ namespace EventEae1._2_Backend.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EventEae1._2_Backend.Models.TicketSale", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SaleTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("TicketTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("TicketTypeId");
+
+                    b.ToTable("TicketSales");
+                });
+
             modelBuilder.Entity("EventEae1._2_Backend.Models.TicketType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -321,6 +355,33 @@ namespace EventEae1._2_Backend.Migrations
                     b.Navigation("Permission");
                 });
 
+            modelBuilder.Entity("EventEae1._2_Backend.Models.TicketSale", b =>
+                {
+                    b.HasOne("EventEae1._2_Backend.Models.User", "Buyer")
+                        .WithMany()
+                        .HasForeignKey("BuyerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("EventEae1._2_Backend.Models.Event", "Event")
+                        .WithMany("TicketSales")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("EventEae1._2_Backend.Models.TicketType", "TicketType")
+                        .WithMany("TicketSales")
+                        .HasForeignKey("TicketTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("Event");
+
+                    b.Navigation("TicketType");
+                });
+
             modelBuilder.Entity("EventEae1._2_Backend.Models.TicketType", b =>
                 {
                     b.HasOne("EventEae1._2_Backend.Models.Event", "Event")
@@ -353,6 +414,8 @@ namespace EventEae1._2_Backend.Migrations
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.Event", b =>
                 {
+                    b.Navigation("TicketSales");
+
                     b.Navigation("TicketTypes");
                 });
 
@@ -361,6 +424,11 @@ namespace EventEae1._2_Backend.Migrations
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserPermissions");
+                });
+
+            modelBuilder.Entity("EventEae1._2_Backend.Models.TicketType", b =>
+                {
+                    b.Navigation("TicketSales");
                 });
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.User", b =>

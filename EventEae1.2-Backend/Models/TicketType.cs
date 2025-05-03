@@ -14,5 +14,7 @@ namespace EventEae1._2_Backend.Models
         public Guid EventId { get; set; }
 
         public Event Event { get; set; }
+
+        public ICollection<TicketSale> TicketSales { get; set; }
     }
 }

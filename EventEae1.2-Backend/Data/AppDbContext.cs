@@ -20,6 +20,8 @@ namespace EventEae1._2_Backend.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<TicketType> TicketTypes { get; set; }
 
+        public DbSet<TicketSale> TicketSales { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -54,6 +56,37 @@ namespace EventEae1._2_Backend.Data
 
             modelBuilder.Entity<User>()
                 .Property(u => u.Status);
+
+
+
+            modelBuilder.Entity<TicketSale>()
+                .HasOne(ts => ts.TicketType)
+                .WithMany(tt => tt.TicketSales)
+                .HasForeignKey(ts => ts.TicketTypeId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+
+            modelBuilder.Entity<TicketSale>()
+                .HasOne(ts => ts.Buyer)
+                .WithMany()
+                .HasForeignKey(ts => ts.BuyerId)
+                .OnDelete(DeleteBehavior.NoAction); 
+
+
+
+            modelBuilder.Entity<TicketSale>()
+                .HasOne(ts => ts.Event)
+                .WithMany(e => e.TicketSales)
+                .HasForeignKey(ts => ts.EventId)
+                .OnDelete(DeleteBehavior.NoAction); 
+                 
+
+          
+            modelBuilder.Entity<TicketSale>()
+                .Property(ts => ts.SaleTime)
+                .HasDefaultValueSql("GETUTCDATE()");
+
 
             // RolePermission configuration
             modelBuilder.Entity<RolePermission>()
