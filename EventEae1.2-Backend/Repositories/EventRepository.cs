@@ -96,6 +96,9 @@ namespace EventEae1._2_Backend.Repository
             if (ticketTypes.Any(t => t.EventId == Guid.Empty))
                 throw new ArgumentException("All ticket types must have a valid EventId.");
 
+            if (ticketTypes.Any(t => t.InitialStock < 0))
+                throw new ArgumentException("Initial stock cannot be negative.", nameof(ticketTypes));
+
             await _context.TicketTypes.AddRangeAsync(ticketTypes);
             await _context.SaveChangesAsync();
         }

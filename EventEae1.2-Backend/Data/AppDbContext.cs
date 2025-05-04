@@ -57,6 +57,17 @@ namespace EventEae1._2_Backend.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Status);
 
+            modelBuilder.Entity<TicketType>()
+                .Property(t => t.InitialStock)
+                .IsRequired()
+                .HasDefaultValue(0);
+
+            modelBuilder.Entity<TicketType>()
+                .HasOne(t => t.Event)
+                 .WithMany(e => e.TicketTypes)
+                .HasForeignKey(t => t.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
 
             modelBuilder.Entity<TicketSale>()
@@ -147,12 +158,7 @@ namespace EventEae1._2_Backend.Data
                 new RolePermission { Role = "client", PermissionId = 9, Id = 11 }
             );
 
-            // Event configuration
-            modelBuilder.Entity<Event>()
-                .HasMany(e => e.TicketTypes)
-                .WithOne(t => t.Event)
-                .HasForeignKey(t => t.EventId)
-                .OnDelete(DeleteBehavior.Cascade);
+            
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserPermissions)

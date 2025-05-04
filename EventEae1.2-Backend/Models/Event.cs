@@ -28,7 +28,9 @@ namespace EventEae1._2_Backend.Models
         // Navigation Property to the User (Organizer)
         public User Organizer { get; set; }
 
-        public ICollection<TicketType> TicketTypes { get; set; }
+        public List<TicketType> TicketTypes { get; set; } = new List<TicketType>();
+
+
 
         public ICollection<TicketSale> TicketSales { get; set; }
     }
