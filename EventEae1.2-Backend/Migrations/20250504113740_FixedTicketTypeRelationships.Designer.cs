@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventEae1._2_Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250503180643_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250504113740_FixedTicketTypeRelationships")]
+    partial class FixedTicketTypeRelationships
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -260,6 +260,11 @@ namespace EventEae1._2_Backend.Migrations
 
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InitialStock")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Name")
                         .IsRequired()

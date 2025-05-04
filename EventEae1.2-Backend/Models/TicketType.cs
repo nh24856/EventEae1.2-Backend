@@ -15,6 +15,8 @@ namespace EventEae1._2_Backend.Models
 
         public Event Event { get; set; }
 
+        public int InitialStock { get; set; }
+
         public ICollection<TicketSale> TicketSales { get; set; }
     }
 }

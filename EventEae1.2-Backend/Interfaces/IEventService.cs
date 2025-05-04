@@ -15,8 +15,7 @@ namespace EventEae1._2_Backend.Interfaces
         Task<List<EventResponseDto>> GetEventsByOrganizerAsync(ClaimsPrincipal user);
         Task<List<EventResponseDto>> GetAllEventsAsync();
         Task<List<TicketTypeDto>> GetTicketTypesByEventIdAsync(Guid eventId);
-
-        Task AddTicketTypesAsync(Guid eventId, List<TicketTypeDto> ticketTypes, ClaimsPrincipal user);
+        Task AddTicketTypesAsync(string eventId, List<TicketTypeDto> ticketTypes, ClaimsPrincipal user);
     }
 
 }
