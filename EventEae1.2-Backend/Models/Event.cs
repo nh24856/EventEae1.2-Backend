@@ -29,5 +29,7 @@ namespace EventEae1._2_Backend.Models
         public User Organizer { get; set; }
 
         public ICollection<TicketType> TicketTypes { get; set; }
+
+        public ICollection<TicketSale> TicketSales { get; set; }
     }
 }

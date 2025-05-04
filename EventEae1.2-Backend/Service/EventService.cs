@@ -10,6 +10,7 @@ using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace EventEae1._2_Backend.Services
 {
@@ -32,11 +33,11 @@ namespace EventEae1._2_Backend.Services
                 throw new UnauthorizedAccessException("User ID not found in token claims.");
             }
 
-            // 1️⃣ Handle file upload
+            // Handle file upload
             string imagePath = null;
             if (eventDto.Image != null && eventDto.Image.Length > 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
@@ -48,12 +49,13 @@ namespace EventEae1._2_Backend.Services
                     await eventDto.Image.CopyToAsync(stream);
                 }
 
-                imagePath = $"/uploads/{uniqueFileName}";
+                imagePath = $"/Uploads/{uniqueFileName}";
             }
 
-            // 2️⃣ Create the event entity
+            // Create the event entity
             var newEvent = new Event
             {
+                Id = Guid.NewGuid(),
                 Name = eventDto.Name,
                 Venue = eventDto.Venue,
                 Date = eventDto.Date,
@@ -62,12 +64,7 @@ namespace EventEae1._2_Backend.Services
                 Category = eventDto.Category,
                 OrganizerId = userId,
                 ImagePath = imagePath,
-                TicketTypes = eventDto.TicketTypes?.Select(t => new TicketType
-                {
-                    Name = t.Name,
-                    Price = t.Price,
-                    Id = Guid.NewGuid()
-                }).ToList() ?? new List<TicketType>()
+                TicketTypes = new List<TicketType>() // Initialize empty
             };
 
             var createdEvent = await _repository.CreateEventAsync(newEvent);
@@ -80,7 +77,47 @@ namespace EventEae1._2_Backend.Services
             return MapToResponseDto(createdEvent);
         }
 
+        public async Task AddTicketTypesAsync(Guid eventId, List<TicketTypeDto> ticketTypes, ClaimsPrincipal user)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token claims.");
+            }
 
+            // Validate event exists and user owns it
+            var eventEntity = await _repository.GetEventByIdAsync(eventId);
+            if (eventEntity == null)
+            {
+                throw new KeyNotFoundException("Event not found.");
+            }
+            if (eventEntity.OrganizerId != userId)
+            {
+                throw new UnauthorizedAccessException("User not authorized to add ticket types for this event.");
+            }
+
+            // Map ticket types
+            var ticketTypeEntities = ticketTypes.Select(t => new TicketType
+            {
+                Id = Guid.NewGuid(),
+                Name = t.Name,
+                Price = t.Price,
+                EventId = eventId
+            }).ToList();
+
+            
+            await _repository.AddTicketTypesAsync(ticketTypeEntities);
+        }
+
+        public async Task<List<TicketTypeDto>> GetTicketTypesByEventIdAsync(Guid eventId)
+        {
+            var ticketTypes = await _repository.GetTicketTypesByEventIdAsync(eventId);
+            return ticketTypes.Select(t => new TicketTypeDto
+            {
+                Name = t.Name,
+                Price = t.Price
+            }).ToList();
+        }
 
         public async Task<EventResponseDto> GetEventByIdAsync(Guid id)
         {
@@ -134,16 +171,14 @@ namespace EventEae1._2_Backend.Services
                 Category = e.Category,
                 OrganizerId = e.OrganizerId,
                 OrganizerName = e.Organizer != null ? $"{e.Organizer.FirstName} {e.Organizer.LastName}" : null,
-                ImagePath = e.ImagePath,  // ✅ Add this if not already there
+                ImagePath = e.ImagePath,
                 TicketTypes = e.TicketTypes?.Select(t => new TicketTypeDto
                 {
-                    Id = t.Id,
                     Name = t.Name,
                     Price = t.Price
                 }).ToList()
             };
         }
-
 
         private Guid GetUserIdFromJwt(string token)
         {
@@ -179,7 +214,5 @@ namespace EventEae1._2_Backend.Services
                 return Guid.Empty;
             }
         }
-
-       
     }
 }
