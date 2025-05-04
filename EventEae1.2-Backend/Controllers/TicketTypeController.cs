@@ -22,7 +22,7 @@ namespace EventEae1._2_Backend.Controllers
       
         [HttpPost]
 
-        [Consumes("application/json")]  
+        [Consumes("application/json")]
         public async Task<ActionResult> CreateTicketTypes([FromBody] CreateTicketTypesDto createTicketTypesDto)
         {
             if (createTicketTypesDto == null || createTicketTypesDto.ticketTypes == null || !createTicketTypesDto.ticketTypes.Any())

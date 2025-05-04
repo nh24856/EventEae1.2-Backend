@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventEae1._2_Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250504113740_FixedTicketTypeRelationships")]
-    partial class FixedTicketTypeRelationships
+    [Migration("20250504134037_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
