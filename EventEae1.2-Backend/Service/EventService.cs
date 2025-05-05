@@ -37,7 +37,7 @@ namespace EventEae1._2_Backend.Services
             string imagePath = null;
             if (eventDto.Image != null && eventDto.Image.Length > 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
@@ -49,7 +49,7 @@ namespace EventEae1._2_Backend.Services
                     await eventDto.Image.CopyToAsync(stream);
                 }
 
-                imagePath = $"/Uploads/{uniqueFileName}";
+                imagePath = $"/{uniqueFileName}";
             }
 
             // Create the event entity

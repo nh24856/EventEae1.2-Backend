@@ -44,5 +44,11 @@ namespace EventEae1._2_Backend.Controllers
             var data = await _ticketSaleService.GetLineGraphDataAsync(eventId);
             return Ok(data);
         }
+        [HttpGet("total-stock/{eventId}")]
+        public async Task<IActionResult> GetTotalStock(Guid eventId)
+        {
+            var totalStock = await _ticketSaleService.GetTotalStockByEventIdAsync(eventId);
+            return Ok(totalStock);
+        }
     }
 }
