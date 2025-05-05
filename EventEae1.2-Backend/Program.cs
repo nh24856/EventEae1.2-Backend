@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
+using EventEae1._2_Backend.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AdminRepository>();
 builder.Services.AddScoped<EventRepository>();
+builder.Services.AddScoped<TicketSaleRepository>();
 
 
 // Register Services
@@ -72,8 +74,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddScoped<IEventService, EventService>(); // Event service
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<ITicketSaleService, TicketSaleService>();
 builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
+
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -132,6 +136,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication(); // Authentication BEFORE Authorization
 app.UseAuthorization();
+app.UseStaticFiles();
 
 app.MapControllers();
 

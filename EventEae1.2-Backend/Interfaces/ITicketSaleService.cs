@@ -8,5 +8,6 @@ namespace EventEae1._2_Backend.Interfaces
         Task<TicketSale> BuyTicketAsync(CreateTicketSaleDto dto);
         Task<List<PieChartDto>> GetPieChartDataAsync(Guid eventId);
         Task<List<LineGraphDto>> GetLineGraphDataAsync(Guid eventId);
+        Task<int> GetTotalStockByEventIdAsync(Guid eventId);
     }
 }

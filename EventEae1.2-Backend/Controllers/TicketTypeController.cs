@@ -1,7 +1,10 @@
 ﻿using EventEae1._2_Backend.DTOs;
 using EventEae1._2_Backend.Interfaces;
+using EventEae1._2_Backend.Repositories;
+using EventEae1._2_Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -93,5 +96,7 @@ namespace EventEae1._2_Backend.Controllers
                 return StatusCode(500, new { error = "An unexpected error occurred while retrieving ticket types.", details = ex.Message });
             }
         }
+        
+
     }
 }

@@ -2,6 +2,7 @@
 using EventEae1._2_Backend.Interfaces;
 using EventEae1._2_Backend.Models;
 using EventEae1._2_Backend.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,6 +31,10 @@ namespace EventEae1._2_Backend.Services
         public async Task<List<LineGraphDto>> GetLineGraphDataAsync(Guid eventId)
         {
             return await _repository.GetLineGraphDataAsync(eventId);
+        }
+        public async Task<int> GetTotalStockByEventIdAsync(Guid eventId)
+        {
+            return await _repository.GetTotalStockByEventIdAsync(eventId);
         }
     }
 }
