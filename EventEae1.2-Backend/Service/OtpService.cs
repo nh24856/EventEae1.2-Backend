@@ -28,7 +28,7 @@ namespace EventEae1._2_Backend.Service
 
             // Store OTP in memory cache with 5-minute expiration
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
             _memoryCache.Set(email, otp, cacheEntryOptions);
 
             // Send OTP via email
