@@ -112,5 +112,10 @@ namespace EventEae1._2_Backend.Repository
                 .Where(t => t.EventId == eventId)
                 .ToListAsync();
         }
+
+        public async Task<User> GetUserByIdAsync(Guid userId)
+        {
+            return await _context.Users.FindAsync(userId);
+        }
     }
 }

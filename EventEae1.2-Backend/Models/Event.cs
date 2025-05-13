@@ -15,7 +15,7 @@ namespace EventEae1._2_Backend.Models
         public string Venue { get; set; }
         public string Category { get; set; }
 
-        public string ImagePath { get; set; }
+        public string? ImagePath { get; set; }
 
         public DateTime Date { get; set; }
 

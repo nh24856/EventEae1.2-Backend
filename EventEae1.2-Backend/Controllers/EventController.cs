@@ -19,16 +19,15 @@ namespace EventEae1._2_Backend.Controllers
             _eventService = eventService;
         }
 
-        [Authorize] 
+        [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult> CreateEvent([FromForm] EventDto eventDto)
+        public async Task<IActionResult> CreateEvent([FromForm] CreateEventDto eventDto)
         {
             if (eventDto == null)
                 return BadRequest("Event data is required.");
 
             try
             {
-                // Instead of extracting the token manually, get user info from User.Claims
                 var createdEvent = await _eventService.CreateEventAsync(eventDto, User);
 
                 if (createdEvent == null)

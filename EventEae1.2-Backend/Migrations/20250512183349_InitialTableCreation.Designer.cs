@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventEae1._2_Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250504113740_FixedTicketTypeRelationships")]
-    partial class FixedTicketTypeRelationships
+    [Migration("20250512183349_InitialTableCreation")]
+    partial class InitialTableCreation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,7 +43,6 @@ namespace EventEae1._2_Backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImagePath")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
