@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventEae1._2_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialTableCreation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,7 +71,7 @@ namespace EventEae1._2_Backend.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Venue = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Time = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),

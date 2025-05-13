@@ -25,31 +25,12 @@ namespace EventEae1._2_Backend.Services
             _configuration = configuration;
         }
 
-        public async Task<EventResponseDto> CreateEventAsync(EventDto eventDto, ClaimsPrincipal user)
+        public async Task<EventResponseDto> CreateEventAsync(CreateEventDto eventDto, ClaimsPrincipal user)
         {
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
                 throw new UnauthorizedAccessException("User ID not found in token claims.");
-            }
-
-            // Handle file upload
-            string imagePath = null;
-            if (eventDto.Image != null && eventDto.Image.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(eventDto.Image.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await eventDto.Image.CopyToAsync(stream);
-                }
-
-                imagePath = $"/{uniqueFileName}";
             }
 
             // Create the event entity
@@ -62,8 +43,7 @@ namespace EventEae1._2_Backend.Services
                 Time = eventDto.Time,
                 Description = eventDto.Description,
                 Category = eventDto.Category,
-                OrganizerId = userId,
-                ImagePath = imagePath,
+                OrganizerId = userId
                
             };
 
@@ -172,8 +152,7 @@ namespace EventEae1._2_Backend.Services
                 Description = e.Description,
                 Category = e.Category,
                 OrganizerId = e.OrganizerId,
-                OrganizerName = e.Organizer != null ? $"{e.Organizer.FirstName} {e.Organizer.LastName}" : null,
-                ImagePath = e.ImagePath,
+                OrganizerName = e.Organizer != null ? $"{e.Organizer.FirstName} {e.Organizer.LastName}" : null
                 
             };
         }
