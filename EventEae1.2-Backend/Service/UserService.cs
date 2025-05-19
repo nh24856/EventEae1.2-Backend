@@ -15,12 +15,15 @@ namespace EventEae1._2_Backend.Services
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IAuditLogService _auditLogService;
 
-        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration config)
+        public UserService(IUserRepository userRepository, IMapper mapper, 
+            IConfiguration config, IAuditLogService auditLogService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _config = config;
+            _auditLogService = auditLogService;
         }
 
         public async Task<UserDto> RegisterAsync(RegisterUserDto dto)
@@ -30,12 +33,20 @@ namespace EventEae1._2_Backend.Services
 
             var existingUser = await _userRepository.GetUserByEmailAsync(dto.Email);
             if (existingUser != null)
-                throw new Exception("Email already exists.");
+
+                {
+                     await _auditLogService.LogAsync("anonymous", dto.Email, "RegistrationFailed",
+                         "User", null, null, new { Reason = "Email already exists" });
+                     throw new Exception("Email already exists."); 
+                }
 
             var user = _mapper.Map<User>(dto);
             user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             await _userRepository.AddUserAsync(user);
+
+            await _auditLogService.LogAsync(user.Id.ToString(), user.Email, "UserRegistered",
+                "User", user.Id.ToString(), null, new { Role = user.Role, Status = user.Status });
 
             return _mapper.Map<UserDto>(user);
         }
@@ -44,7 +55,13 @@ namespace EventEae1._2_Backend.Services
         {
             var user = await _userRepository.GetUserWithPermissionsAsync(dto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
-                throw new Exception("Invalid email or password.");
+                {
+                     await _auditLogService.LogAsync("anonymous", dto.Email, "LoginFailed");
+                     throw new Exception("Invalid email or password.");
+                 }
+
+            await _auditLogService.LogAsync(user.Id.ToString(), user.Email, "LoginSuccess",
+                "User", user.Id.ToString());
 
             var allPermissions = await GetAllPermissionsAsync(user);
             var token = GenerateJwtToken(user, allPermissions);
@@ -56,7 +73,13 @@ namespace EventEae1._2_Backend.Services
         {
             var user = await _userRepository.GetUserWithPermissionsAsync(email);
             if (user == null)
+            {
+                await _auditLogService.LogAsync("system", email, "TokenGenerationFailed");
                 throw new Exception("User not found.");
+            }
+
+            await _auditLogService.LogAsync(user.Id.ToString(), user.Email, "TokenGenerated", "User",
+                user.Id.ToString());
 
             var allPermissions = await GetAllPermissionsAsync(user);
             var token = GenerateJwtToken(user, allPermissions);
@@ -68,10 +91,16 @@ namespace EventEae1._2_Backend.Services
         {
             var user = await _userRepository.GetUserByEmailAsync(dto.Email);
             if (user == null)
+            {
+                await _auditLogService.LogAsync("system", dto.Email, "PasswordResetRequestFailed");
                 throw new Exception("Email not found.");
+            }
 
             // Generate password reset token (simplified)
             var resetToken = Guid.NewGuid().ToString();
+
+            await _auditLogService.LogAsync(user.Id.ToString(), user.Email,
+                "PasswordResetRequested", "User", user.Id.ToString());
             // In real implementation: store token and send email
         }
 
