@@ -2,6 +2,7 @@
 using EventEae1._2_Backend.Interfaces;
 using EventEae1._2_Backend.Models;
 using EventEae1._2_Backend.Repository;
+using EventEae1._2_Backend.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,20 +19,26 @@ namespace EventEae1._2_Backend.Services
     {
         private readonly EventRepository _repository;
         private readonly IConfiguration _configuration;
+        private readonly IAuditLogService _auditLogService;
 
-        public EventService(EventRepository repository, IConfiguration configuration)
+        public EventService(EventRepository repository, IConfiguration configuration, IAuditLogService auditLogService)
         {
             _repository = repository;
             _configuration = configuration;
+            _auditLogService = auditLogService;
         }
 
         public async Task<EventResponseDto> CreateEventAsync(CreateEventDto eventDto, ClaimsPrincipal user)
         {
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            var userEmailClaim = user.FindFirst(JwtRegisteredClaimNames.Email);
+
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
                 throw new UnauthorizedAccessException("User ID not found in token claims.");
             }
+
+            var userEmail = userEmailClaim?.Value ?? "unknown";
 
             // Create the event entity
             var newEvent = new Event
@@ -44,10 +51,19 @@ namespace EventEae1._2_Backend.Services
                 Description = eventDto.Description,
                 Category = eventDto.Category,
                 OrganizerId = userId
-               
             };
 
             var createdEvent = await _repository.CreateEventAsync(newEvent);
+
+            // Audit log for event creation
+            await _auditLogService.LogAsync(userId.ToString(), userEmail, "EventCreated",
+                "Event", createdEvent.Id.ToString(), null, new
+                {
+                    Name = createdEvent.Name,
+                    Venue = createdEvent.Venue,
+                    Date = createdEvent.Date,
+                    Category = createdEvent.Category
+                });
 
             if (createdEvent.Organizer == null)
             {
@@ -71,7 +87,10 @@ namespace EventEae1._2_Backend.Services
                 throw new KeyNotFoundException("Event not found.");
             }
 
-            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            var userEmailClaim = user.FindFirst(JwtRegisteredClaimNames.Email);
+            var userId = userIdClaim?.Value ?? "unknown";
+            var userEmail = userEmailClaim?.Value ?? "unknown";
 
             var ticketTypeEntities = ticketTypes.Select(t => new TicketType
             {
@@ -83,6 +102,14 @@ namespace EventEae1._2_Backend.Services
             }).ToList();
 
             await _repository.AddTicketTypesAsync(ticketTypeEntities);
+
+            // Audit log for ticket types addition
+            await _auditLogService.LogAsync(userId, userEmail, "TicketTypesAdded",
+                "Event", parsedEventId.ToString(), null, new
+                {
+                    EventName = eventEntity.Name,
+                    TicketTypes = ticketTypes.Select(t => new { t.Name, t.Price, t.InitialStock })
+                });
         }
 
         public async Task<List<TicketTypeDto>> GetTicketTypesByEventIdAsync(Guid eventId)
@@ -153,45 +180,7 @@ namespace EventEae1._2_Backend.Services
                 Category = e.Category,
                 OrganizerId = e.OrganizerId,
                 OrganizerName = e.Organizer != null ? $"{e.Organizer.FirstName} {e.Organizer.LastName}" : null
-                
             };
         }
-
-        private Guid GetUserIdFromJwt(string token)
-        {
-            if (string.IsNullOrEmpty(token))
-            {
-                Console.WriteLine("Token is null or empty");
-                return Guid.Empty;
-            }
-
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-                if (jsonToken == null)
-                {
-                    Console.WriteLine("Invalid token format");
-                    return Guid.Empty;
-                }
-
-                var userIdClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
-                {
-                    Console.WriteLine("NameIdentifier claim not found");
-                    Console.WriteLine("Available claims: " + string.Join(", ", jsonToken.Claims.Select(c => $"{c.Type}: {c.Value}")));
-                    return Guid.Empty;
-                }
-
-                return Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Token validation error: {ex.Message}");
-                return Guid.Empty;
-            }
-        }
-
-        
     }
 }

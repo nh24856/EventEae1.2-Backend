@@ -12,6 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.OpenApi.Models;
 using AutoMapper;
 using EventEae1._2_Backend.Repositories;
+using EventEae1._2_Backend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,8 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<ITicketSaleService, TicketSaleService>();
 builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 
 // Configure CORS
@@ -140,5 +143,8 @@ app.UseAuthorization();
 app.UseStaticFiles();
 
 app.MapControllers();
+
+app.UseRouting();
+app.UseMiddleware<AuditLogMiddleware>();
 
 app.Run();

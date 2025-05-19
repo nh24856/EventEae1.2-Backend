@@ -21,10 +21,22 @@ namespace EventEae1._2_Backend.Data
         public DbSet<TicketType> TicketTypes { get; set; }
 
         public DbSet<TicketSale> TicketSales { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasIndex(a => a.UserId);
+                entity.HasIndex(a => a.Action);
+                entity.HasIndex(a => a.EntityType);
+                entity.HasIndex(a => a.EntityId);
+                entity.HasIndex(a => a.Timestamp);
+                entity.HasIndex(a => a.UserEmail);
+            });
 
             // User configuration
             modelBuilder.Entity<User>()

@@ -18,6 +18,23 @@ namespace EventEae1._2_Backend.Repository
             _context = context;
         }
 
+        public async Task<List<string>> GetUserPermissionsAsync(Guid userId)
+        {
+            return await _context.UserPermissions
+                .Where(up => up.UserId == userId)
+                .Include(up => up.Permission)
+                .Select(up => up.Permission.Name)
+                .ToListAsync();
+        }
+
+        public async Task<User> GetUserByIdAsync(Guid userId)
+        {
+            return await _context.Users
+                .Include(u => u.UserPermissions)
+                .ThenInclude(up => up.Permission)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
             var users = await _context.Users
