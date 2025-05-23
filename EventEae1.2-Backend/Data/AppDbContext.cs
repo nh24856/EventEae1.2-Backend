@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Security;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using EventEae1._2_Backend.Models;
 
 namespace EventEae1._2_Backend.Data
 {
@@ -21,6 +22,8 @@ namespace EventEae1._2_Backend.Data
         public DbSet<TicketType> TicketTypes { get; set; }
 
         public DbSet<TicketSale> TicketSales { get; set; }
+
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -121,6 +124,14 @@ namespace EventEae1._2_Backend.Data
                 .HasOne(up => up.User)
                 .WithMany(u => u.UserPermissions)
                 .HasForeignKey(up => up.UserId);
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.Action)
+                .HasConversion<string>(); // Store as string (default behavior)
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.Status)
+                .HasConversion<string>(); // Store as string
 
             // Seed Permissions
             var permissions = new[]
