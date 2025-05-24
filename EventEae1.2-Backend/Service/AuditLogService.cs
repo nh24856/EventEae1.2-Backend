@@ -1,4 +1,5 @@
-﻿using EventEae1._2_Backend.Interfaces;
+﻿using EventEae1._2_Backend.Dtos;
+using EventEae1._2_Backend.Interfaces;
 using EventEae1._2_Backend.Models;
 using EventEae1._2_Backend.Repositories;
 
@@ -26,6 +27,11 @@ namespace EventEae1._2_Backend.Service
             };
 
             await _auditLogRepository.AddAuditLogAsync(auditLog);
+        }
+
+        public async Task<List<AuditLogResponseDto>> GetAuditLogsByDateAsync()
+        {
+            return await _auditLogRepository.GetAuditLogsByDateAsync();
         }
     }
 }

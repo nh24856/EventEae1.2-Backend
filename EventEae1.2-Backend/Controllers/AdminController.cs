@@ -9,10 +9,12 @@ namespace EventEae1._2_Backend.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IAuditLogService _auditLogService;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, IAuditLogService auditLogService)
         {
             _adminService = adminService;
+            _auditLogService = auditLogService;
         }
 
         [HttpGet("users")]
@@ -48,6 +50,20 @@ namespace EventEae1._2_Backend.Controllers
         {
             await _adminService.SetManagerApprovalStatusAsync(managerId, dto.Approved);
             return Ok(new { message = $"Manager has been {(dto.Approved ? "approved" : "rejected")}." });
+        }
+
+        [HttpGet("audit-logs")]
+        public async Task<IActionResult> GetAuditLogsByDate()
+        {
+            try
+            {
+                var auditLogs = await _auditLogService.GetAuditLogsByDateAsync();
+                return Ok(auditLogs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

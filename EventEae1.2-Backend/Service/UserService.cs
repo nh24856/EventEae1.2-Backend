@@ -37,6 +37,11 @@ namespace EventEae1._2_Backend.Services
             var user = _mapper.Map<User>(dto);
             user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
+            if (dto.Role == "manager")
+            {
+                user.Status = "pending";
+            }
+
             await _userRepository.AddUserAsync(user);
 
             return _mapper.Map<UserDto>(user);
@@ -50,6 +55,11 @@ namespace EventEae1._2_Backend.Services
                 // Log failed login attempt
                 await _auditLogService.LogAsync(null, AuditAction.Login, AuditStatus.Failed, "Invalid email or password");
                 throw new Exception("Invalid email or password.");
+            }
+
+            if (user.Role == "manager" && user.Status == "pending")
+            {
+                throw new Exception("Manager account is pending approval.");
             }
 
             var allPermissions = await GetAllPermissionsAsync(user);

@@ -45,7 +45,7 @@ namespace EventEae1._2_Backend.Controllers
         {
             try
             {
-                await _userService.LoginAsync(dto);
+                var loginResponse = await _userService.LoginAsync(dto);
                 await _otpService.GenerateAndSendOTPAsync(dto.Email);
                 return Ok(new { message = "OTP sent to your email." });
             }
@@ -126,5 +126,6 @@ namespace EventEae1._2_Backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
     }
 }
