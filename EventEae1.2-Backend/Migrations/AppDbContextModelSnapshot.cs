@@ -22,6 +22,37 @@ namespace EventEae1._2_Backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("EventEae1._2_Backend.Models.AuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Timestamp", "Action");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("EventEae1._2_Backend.Models.Event", b =>
                 {
                     b.Property<Guid>("Id")
@@ -335,6 +366,15 @@ namespace EventEae1._2_Backend.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("UserPermissions");
+                });
+
+            modelBuilder.Entity("EventEae1._2_Backend.Models.AuditLog", b =>
+                {
+                    b.HasOne("EventEae1._2_Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EventEae1._2_Backend.Models.Event", b =>

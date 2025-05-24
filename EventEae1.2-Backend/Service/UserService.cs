@@ -15,12 +15,14 @@ namespace EventEae1._2_Backend.Services
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IAuditLogService _auditLogService;
 
-        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration config)
+        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration config, IAuditLogService auditLogService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _config = config;
+            _auditLogService = auditLogService;
         }
 
         public async Task<UserDto> RegisterAsync(RegisterUserDto dto)
@@ -35,6 +37,11 @@ namespace EventEae1._2_Backend.Services
             var user = _mapper.Map<User>(dto);
             user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
+            if (dto.Role == "manager")
+            {
+                user.Status = "pending";
+            }
+
             await _userRepository.AddUserAsync(user);
 
             return _mapper.Map<UserDto>(user);
@@ -44,10 +51,22 @@ namespace EventEae1._2_Backend.Services
         {
             var user = await _userRepository.GetUserWithPermissionsAsync(dto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+            {
+                // Log failed login attempt
+                await _auditLogService.LogAsync(null, AuditAction.Login, AuditStatus.Failed, "Invalid email or password");
                 throw new Exception("Invalid email or password.");
+            }
+
+            if (user.Role == "manager" && user.Status == "pending")
+            {
+                throw new Exception("Manager account is pending approval.");
+            }
 
             var allPermissions = await GetAllPermissionsAsync(user);
             var token = GenerateJwtToken(user, allPermissions);
+
+            // Log successful login
+            await _auditLogService.LogAsync(user.Id, AuditAction.Login, AuditStatus.Success);
 
             return CreateLoginResponse(user, token, allPermissions);
         }
