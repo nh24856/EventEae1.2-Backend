@@ -42,5 +42,31 @@ namespace EventEae1._2_Backend.Services
 
             await smtpClient.SendMailAsync(mailMessage);
         }
+
+        public async Task SendManagerApprovalEmailAsync(string email, bool isApproved)
+        {
+            var subject = isApproved ? "Manager Account Approved" : "Manager Account Rejected";
+            var body = isApproved
+                ? "Dear Manager,\n\nYour account has been approved. You can now access the system.\n\nBest regards,\nEventEase Team"
+                : "Dear Manager,\n\nYour account has been rejected. Please contact the administrator for more details.\n\nBest regards,\nEventEase Team";
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_fromEmail),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = false
+            };
+            mailMessage.To.Add(email);
+
+            using var smtpClient = new SmtpClient(_smtpServer, _smtpPort)
+            {
+                Credentials = new NetworkCredential(_smtpUser, _smtpPass),
+                EnableSsl = true
+            };
+
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+
     }
 }

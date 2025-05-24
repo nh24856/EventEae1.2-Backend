@@ -97,7 +97,7 @@ namespace EventEae1._2_Backend.Repository
                 .ToListAsync();
         }
 
-        public async Task SetManagerApprovalStatusAsync(Guid managerId, bool isApproved)
+        public async Task<(bool success, string Email)> SetManagerApprovalStatusAsync(Guid managerId, bool isApproved)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Id == managerId && u.Role == "manager");
@@ -106,7 +106,9 @@ namespace EventEae1._2_Backend.Repository
             {
                 user.Status = isApproved ? "approved" : "locked";
                 await _context.SaveChangesAsync();
+                return (true, user.Email);
             }
+            return (false, null);
         }
     }
 }
