@@ -7,10 +7,12 @@ namespace EventEae1._2_Backend.Services
     public class AdminService : IAdminService
     {
         private readonly AdminRepository _adminRepository;
+        private readonly IEmailService _emailService;
 
-        public AdminService(AdminRepository adminRepository)
+        public AdminService(AdminRepository adminRepository, IEmailService emailService)
         {
             _adminRepository = adminRepository;
+            _emailService = emailService;
         }
 
         // Fetch all users
@@ -40,7 +42,16 @@ namespace EventEae1._2_Backend.Services
         // Approve or reject manager
         public async Task SetManagerApprovalStatusAsync(Guid managerId, bool isApproved)
         {
-            await _adminRepository.SetManagerApprovalStatusAsync(managerId, isApproved);
+            var (success, email) = await _adminRepository.SetManagerApprovalStatusAsync(managerId, isApproved);
+            if (!success)
+            {
+                throw new Exception("Manager not found or invalid role.");
+            }
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                await _emailService.SendManagerApprovalEmailAsync(email, isApproved);
+            }
         }
     }
 }

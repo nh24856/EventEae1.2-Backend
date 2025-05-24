@@ -3,5 +3,6 @@
     public interface IEmailService
     {
         Task SendOTPAsync(string email, string otp);
+        Task SendManagerApprovalEmailAsync(string email, bool isApproved);
     }
 }
